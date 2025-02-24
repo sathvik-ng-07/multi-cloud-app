@@ -82,7 +82,7 @@ multi-cloud-app/
 Clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/<your-username>/multi-cloud-app.git
+git clone https://github.com/sathvik-ng-07/multi-cloud-app.git
 cd multi-cloud-app
 ```
 
