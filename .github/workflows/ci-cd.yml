@@ -1,0 +1,41 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Build and Push Docker Images
+        run: |
+          docker build -t ${{ secrets.REGISTRY }}/frontend:latest ./frontend
+          docker build -t ${{ secrets.REGISTRY }}/backend:latest ./backend
+          docker push ${{ secrets.REGISTRY }}/frontend:latest
+          docker push ${{ secrets.REGISTRY }}/backend:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Deploy to AWS
+        run: |
+          aws eks update-kubeconfig --name multi-cloud-cluster --region us-west-2
+          kubectl apply -f kubernetes/
+
+      - name: Deploy to Azure
+        run: |
+          az aks get-credentials --resource-group myResourceGroup --name myAKSCluster
+          kubectl apply -f kubernetes/
+
+      - name: Deploy to GCP
+        run: |
+          gcloud container clusters get-credentials multi-cloud-cluster --zone us-central1-a
+          kubectl apply -f kubernetes/
